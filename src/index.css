@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* WCC Residents Permission Portal — design system
+   Forest green primary, warm brown accent, cream surfaces.
+   All colors HSL. */
+
+@layer base {
+  :root {
+    --background: 42 33% 97%;          /* warm cream */
+    --foreground: 150 18% 12%;         /* deep forest ink */
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 18% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 18% 12%;
+
+    --primary: 148 42% 22%;            /* forest green */
+    --primary-foreground: 42 40% 97%;
+    --primary-glow: 145 38% 34%;
+
+    --secondary: 32 38% 92%;           /* parchment */
+    --secondary-foreground: 150 22% 18%;
+
+    --muted: 40 22% 93%;
+    --muted-foreground: 150 8% 38%;
+
+    --accent: 28 48% 38%;              /* warm brown */
+    --accent-foreground: 42 40% 97%;
+    --accent-soft: 32 55% 88%;
+
+    --gold: 40 60% 52%;                /* WCC gold */
+    --gold-foreground: 150 22% 14%;
+
+    --success: 142 55% 32%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 45%;
+    --warning-foreground: 30 30% 12%;
+    --destructive: 0 65% 42%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 36 18% 86%;
+    --input: 36 18% 86%;
+    --ring: 148 42% 22%;
+
+    --radius: 0.625rem;
+
+    --gradient-hero: linear-gradient(135deg, hsl(148 42% 18%) 0%, hsl(148 38% 28%) 55%, hsl(28 42% 30%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(40 30% 98%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(40 60% 52%) 0%, hsl(28 55% 42%) 100%);
+
+    --shadow-soft: 0 1px 2px hsl(150 20% 12% / 0.06), 0 4px 14px hsl(150 25% 12% / 0.06);
+    --shadow-elevated: 0 8px 30px -8px hsl(148 42% 18% / 0.25);
+    --shadow-leaf: 0 20px 60px -20px hsl(148 42% 18% / 0.45);
+
+    --sidebar-background: 148 42% 14%;
+    --sidebar-foreground: 42 30% 92%;
+    --sidebar-primary: 40 60% 52%;
+    --sidebar-primary-foreground: 150 22% 14%;
+    --sidebar-accent: 148 35% 20%;
+    --sidebar-accent-foreground: 42 40% 97%;
+    --sidebar-border: 148 30% 22%;
+    --sidebar-ring: 40 60% 52%;
+  }
+
+  .dark {
+    --background: 150 22% 8%;
+    --foreground: 42 30% 94%;
+    --card: 150 22% 11%;
+    --card-foreground: 42 30% 94%;
+    --popover: 150 22% 11%;
+    --popover-foreground: 42 30% 94%;
+    --primary: 145 45% 55%;
+    --primary-foreground: 150 22% 10%;
+    --secondary: 150 18% 16%;
+    --secondary-foreground: 42 30% 94%;
+    --muted: 150 18% 16%;
+    --muted-foreground: 42 12% 65%;
+    --accent: 28 50% 55%;
+    --accent-foreground: 150 22% 10%;
+    --border: 150 18% 20%;
+    --input: 150 18% 20%;
+    --ring: 145 45% 55%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { font-family: 'Inter', system-ui, sans-serif; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  h1, h2, h3, h4, .font-display {
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .surface-card {
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-soft);
+    @apply border border-border rounded-xl;
+  }
+  .stat-card {
+    @apply surface-card p-6 transition-all duration-300 hover:-translate-y-0.5;
+    box-shadow: var(--shadow-soft);
+  }
+  .stat-card:hover { box-shadow: var(--shadow-elevated); }
+  .ring-leaf {
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.15), 0 10px 40px -12px hsl(var(--primary) / 0.35);
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}
