@@ -163,26 +163,31 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
   </div>
 );
 
-const DateTimePair = ({ date, time, onDate, onTime }: { date?: Date; time: string; onDate: (d?: Date) => void; onTime: (t: string) => void }) => (
-  <div className="grid grid-cols-[1fr_140px] gap-2">
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className="justify-start font-normal bg-background">
-          <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-          {date ? format(date, "PP") : "Pick date"}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
-        <Calendar mode="single" selected={date} onSelect={onDate} initialFocus />
-      </PopoverContent>
-    </Popover>
-    <Select value={time} onValueChange={onTime}>
-      <SelectTrigger className="bg-background"><SelectValue placeholder="Time" /></SelectTrigger>
-      <SelectContent className="max-h-72">
-        {TIMES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
-      </SelectContent>
-    </Select>
-  </div>
-);
+const DateTimePair = ({ date, time, onDate, onTime }: { date?: Date; time: string; onDate: (d?: Date) => void; onTime: (t: string) => void }) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  return (
+    <div className="grid grid-cols-[1fr_140px] gap-2">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="justify-start font-normal bg-background">
+            <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+            {date ? format(date, "PP") : "Pick date"}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar mode="single" selected={date} onSelect={onDate} disabled={(d) => d < today} initialFocus />
+        </PopoverContent>
+      </Popover>
+      <Select value={time} onValueChange={onTime}>
+        <SelectTrigger className="bg-background"><SelectValue placeholder="Time" /></SelectTrigger>
+        <SelectContent className="max-h-72">
+          {TIMES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+};
 
 export default PermissionForm;

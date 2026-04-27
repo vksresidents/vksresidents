@@ -1,15 +1,17 @@
 import { PortalLayout } from "@/components/portal/PortalLayout";
 import { findStudent, useApp } from "@/store/useApp";
 import { PERMISSION_LABELS } from "@/types/domain";
-import { Trash2 } from "lucide-react";
+import { Trash2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/portal/StatusBadge";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const ParentTrack = () => {
   const { user, requests, removeRequest } = useApp();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const myReqs = requests
     .filter((r) => r.parentId === user?.parentId && r.status !== "rejected" && r.status !== "arrived")
     .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
@@ -17,6 +19,15 @@ const ParentTrack = () => {
   return (
     <PortalLayout>
       <section className="container py-10">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/")}
+          className="mb-6 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
         <div className="mb-8">
           <div className="text-xs uppercase tracking-[0.22em] text-accent">Parent Portal</div>
           <h1 className="font-display text-4xl mt-2">Track requests</h1>
@@ -38,23 +49,27 @@ const ParentTrack = () => {
                   </div>
                   <StatusBadge status={r.status} />
                 </div>
-                <dl className="mt-5 grid grid-cols-2 gap-y-2 text-sm">
-                  <dt className="text-muted-foreground">Destination</dt><dd className="text-right truncate">{r.destination}</dd>
-                  <dt className="text-muted-foreground">Leaves</dt><dd className="text-right">{format(new Date(r.expectedLeave), "dd MMM · HH:mm")}</dd>
-                  <dt className="text-muted-foreground">Returns</dt><dd className="text-right">{format(new Date(r.expectedReturn), "dd MMM · HH:mm")}</dd>
-                  <dt className="text-muted-foreground">Medical</dt><dd className="text-right">{r.medical ? "Yes" : "No"}</dd>
-                </dl>
-                {isPending && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => { removeRequest(r.id); toast({ title: "Request deleted" }); }}
-                    className="absolute bottom-3 right-3 text-muted-foreground hover:text-destructive"
-                    aria-label="Delete request"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+                <div className="mt-5">
+                  <dl className="grid grid-cols-2 gap-y-2 text-sm">
+                    <dt className="text-muted-foreground">Destination</dt><dd className="text-right truncate">{r.destination}</dd>
+                    <dt className="text-muted-foreground">Leaves</dt><dd className="text-right">{format(new Date(r.expectedLeave), "dd MMM · HH:mm")}</dd>
+                    <dt className="text-muted-foreground">Returns</dt><dd className="text-right">{format(new Date(r.expectedReturn), "dd MMM · HH:mm")}</dd>
+                    <dt className="text-muted-foreground">Medical</dt><dd className="text-right">{r.medical ? "Yes" : "No"}</dd>
+                  </dl>
+                  {isPending && (
+                    <div className="mt-3 flex justify-end">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => { removeRequest(r.id); toast({ title: "Request deleted" }); }}
+                        className="text-muted-foreground hover:text-destructive h-6 w-6 p-0"
+                        aria-label="Delete request"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </article>
             );
           })}

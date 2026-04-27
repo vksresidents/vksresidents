@@ -9,7 +9,7 @@ export const DeanPending = () => (
   <StaffTablePage role="dean" title="Pending requests" basePath="/dean" filter={isPendingFor("pending_dean")} variant="pending" />
 );
 export const DeanApproved = () => (
-  <StaffTablePage role="dean" title="Approved (Gate Pass Issued)" basePath="/dean"
+  <StaffTablePage role="dean" title="Approved Request" basePath="/dean"
     filter={(r: PermissionRequest) => ["approved", "exited", "arrived"].includes(r.status)} variant="approved" />
 );
 export const DeanRejected = () => (

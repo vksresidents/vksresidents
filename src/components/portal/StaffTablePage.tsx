@@ -31,11 +31,24 @@ export const StaffTablePage = ({ role, title, basePath, filter, variant }: Props
   const [search, setSearch] = useState("");
   const [type, setType] = useState("all");
   const [hostel, setHostel] = useState("all");
+  const [date, setDate] = useState<Date | null>(null);
   const [sel, setSel] = useState<PermissionRequest | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [confirmReject, setConfirmReject] = useState(false);
   const [confirmApprove, setConfirmApprove] = useState(false);
   const [reason, setReason] = useState("");
+
+  const dateToCompare = (dateStr?: string) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  };
+
+  const filterByDate = (r: PermissionRequest) => {
+    if (!date) return true;
+    const filterDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+    return dateToCompare(r.expectedLeave) === filterDate || dateToCompare(r.expectedReturn) === filterDate || dateToCompare(r.actualLeave) === filterDate || dateToCompare(r.actualReturn) === filterDate;
+  };
 
   const rows = useMemo(() => {
     return requests
@@ -47,9 +60,10 @@ export const StaffTablePage = ({ role, title, basePath, filter, variant }: Props
         if (q && !`${s?.name} ${s?.regNo} ${p?.name}`.toLowerCase().includes(q)) return false;
         if (type !== "all" && r.type !== type) return false;
         if (hostel !== "all" && s?.hostel !== hostel) return false;
+        if (!date && !filterByDate(r)) return false;
         return true;
       });
-  }, [requests, filter, search, type, hostel]);
+  }, [requests, filter, search, type, hostel, date]);
 
   const handleConfirmApprove = () => {
     if (!sel) return;
@@ -100,6 +114,51 @@ export const StaffTablePage = ({ role, title, basePath, filter, variant }: Props
     </Button>
   );
 
+  // Split rows by date filter
+  const leavedRows = useMemo(() => {
+    if (!date) return rows;
+    return rows.filter((r) => {
+      const reqDate = new Date(r.expectedLeave);
+      const filterDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const reqDay = new Date(reqDate.getFullYear(), reqDate.getMonth(), reqDate.getDate());
+      return reqDay.getTime() === filterDate.getTime();
+    });
+  }, [rows, date]);
+
+  const arrivedRows = useMemo(() => {
+    if (!date) return [];
+    return rows.filter((r) => {
+      const reqDate = new Date(r.expectedReturn);
+      const filterDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const reqDay = new Date(reqDate.getFullYear(), reqDate.getMonth(), reqDate.getDate());
+      return reqDay.getTime() === filterDate.getTime();
+    });
+  }, [rows, date]);
+
+  const actualLeavedRows = useMemo(() => {
+    if (!date) return [];
+    return rows.filter((r) => {
+      if (!r.actualLeave) return false;
+      const reqDate = new Date(r.actualLeave);
+      const filterDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const reqDay = new Date(reqDate.getFullYear(), reqDate.getMonth(), reqDate.getDate());
+      return reqDay.getTime() === filterDate.getTime();
+    });
+  }, [rows, date]);
+
+  const actualReturnedRows = useMemo(() => {
+    if (!date) return [];
+    return rows.filter((r) => {
+      if (!r.actualReturn) return false;
+      const reqDate = new Date(r.actualReturn);
+      const filterDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const reqDay = new Date(reqDate.getFullYear(), reqDate.getMonth(), reqDate.getDate());
+      return reqDay.getTime() === filterDate.getTime();
+    });
+  }, [rows, date]);
+
+  const displayRows = date ? leavedRows : rows;
+
   return (
     <PortalLayout>
       <section className="container py-10">
@@ -115,13 +174,67 @@ export const StaffTablePage = ({ role, title, basePath, filter, variant }: Props
           onFilterType={setType}
           filterHostel={hostel}
           onFilterHostel={setHostel}
+          filterDate={date}
+          onFilterDate={setDate}
           hostels={HOSTELS}
         />
-        <RequestTable
-          rows={rows}
-          onRowClick={setSel}
-          rejection={variant === "rejected"}
-        />
+        {date ? (
+          <div className="space-y-8">
+            {leavedRows.length > 0 && (
+              <div>
+                <h2 className="font-display text-2xl mb-4">
+                  Expected Leave
+                </h2>
+                <RequestTable
+                  rows={leavedRows}
+                  onRowClick={setSel}
+                  rejection={variant === "rejected"}
+                />
+              </div>
+            )}
+            {arrivedRows.length > 0 && (
+              <div>
+                <h2 className="font-display text-2xl mb-4">
+                  Expected Return
+                </h2>
+                <RequestTable
+                  rows={arrivedRows}
+                  onRowClick={setSel}
+                  rejection={variant === "rejected"}
+                />
+              </div>
+            )}
+            {actualLeavedRows.length > 0 && (
+              <div>
+                <h2 className="font-display text-2xl mb-4">Leaved</h2>
+                <RequestTable
+                  rows={actualLeavedRows}
+                  onRowClick={setSel}
+                  rejection={variant === "rejected"}
+                />
+              </div>
+            )}
+            {actualReturnedRows.length > 0 && (
+              <div>
+                <h2 className="font-display text-2xl mb-4">Returned</h2>
+                <RequestTable
+                  rows={actualReturnedRows}
+                  onRowClick={setSel}
+                  rejection={variant === "rejected"}
+                />
+              </div>
+            )}
+            {leavedRows.length === 0 && arrivedRows.length === 0 && actualLeavedRows.length === 0 && actualReturnedRows.length === 0 && (
+              <div className="surface-card p-10 text-center text-muted-foreground">No records found for the selected date.</div>
+            )}
+          </div>
+        ) : (
+          <RequestTable
+            rows={rows}
+            onRowClick={setSel}
+            rejection={variant === "rejected"}
+          />
+        )}
 
         <RequestDetailDialog request={sel} open={!!sel && !rejectOpen && !confirmReject && !confirmApprove} onOpenChange={() => setSel(null)} actions={<>{pendingActions}{notArrivedActions}</>} />
 

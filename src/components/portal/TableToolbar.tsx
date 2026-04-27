@@ -1,6 +1,10 @@
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, Calendar } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 interface Props {
   search: string;
@@ -9,10 +13,12 @@ interface Props {
   onFilterType?: (v: string) => void;
   filterHostel?: string;
   onFilterHostel?: (v: string) => void;
+  filterDate?: Date | null;
+  onFilterDate?: (v: Date | null) => void;
   hostels?: string[];
 }
 
-export const TableToolbar = ({ search, onSearch, filterType, onFilterType, filterHostel, onFilterHostel, hostels = [] }: Props) => (
+export const TableToolbar = ({ search, onSearch, filterType, onFilterType, filterHostel, onFilterHostel, filterDate, onFilterDate, hostels = [] }: Props) => (
   <div className="flex flex-wrap items-center gap-3 mb-4">
     <div className="relative flex-1 min-w-[220px]">
       <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -49,6 +55,23 @@ export const TableToolbar = ({ search, onSearch, filterType, onFilterType, filte
           ))}
         </SelectContent>
       </Select>
+    )}
+    {onFilterDate && (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="w-[180px] bg-card justify-start text-left font-normal">
+            <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+            {filterDate ? format(filterDate, "MMM dd, yyyy") : "Pick date"}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <CalendarComponent
+            mode="single"
+            selected={filterDate || undefined}
+            onSelect={onFilterDate}
+          />
+        </PopoverContent>
+      </Popover>
     )}
   </div>
 );

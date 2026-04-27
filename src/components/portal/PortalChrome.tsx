@@ -17,38 +17,41 @@ export const PortalHeader = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-gradient-hero text-primary-foreground shadow-elevated">
-      <div className="container flex items-center justify-between h-20">
-        <Link to="/" className="flex items-center gap-3 group">
-          <img src={logo} alt="Women's Christian College crest" width={56} height={56} className="h-14 w-14 rounded-full bg-background/95 p-1 ring-2 ring-gold/60" />
-          <div className="hidden sm:block leading-tight">
-            <div className="font-display text-2xl">Women's Christian College</div>
-            <div className="text-xs uppercase tracking-[0.18em] text-gold">Residents Permission Portal</div>
-          </div>
-        </Link>
-        <nav className="flex items-center gap-3">
-          <div className="hidden md:flex flex-col items-end leading-tight">
-            <span className="text-sm font-medium">{user.name}</span>
-            <span className="text-[11px] uppercase tracking-wider text-gold/90">{ROLE_LABELS[user.role]}</span>
-          </div>
-          <Button onClick={handleLogout} variant="ghost" size="sm" className="text-primary-foreground hover:bg-white/10">
-            <LogOut className="h-4 w-4 mr-1.5" />
-            <span className="hidden sm:inline">Sign out</span>
-          </Button>
-        </nav>
+    <header className="sticky top-0 z-40">
+      <div className="bg-primary text-center py-1">
+        <p className="text-gold font-display text-sm tracking-[0.3em]">LIGHTED TO LIGHTEN</p>
       </div>
-      {loc.pathname !== "/" && <SubBar />}
+      <div className="bg-background border-b border-border/50">
+        <div className="container flex items-center justify-center py-4 gap-6">
+          <div className="flex flex-col items-center">
+            <img src={logo} alt="Women's Christian College crest" width={100} height={100} className="h-24 w-24 flex-shrink-0" />
+            <div className="text-xs text-muted-foreground mt-2">Since 1915</div>
+          </div>
+          <div className="text-center">
+            <div className="font-display text-3xl text-primary leading-tight">Women's Christian College</div>
+            <div className="text-xs text-muted-foreground mt-1">An Autonomous Institution affiliated to the University of Madras</div>
+            <div className="text-xs text-muted-foreground">Re-accredited by NAAC in 2019 with Grade A+</div>
+            <div className="text-xs text-muted-foreground">College with Potential for Excellence</div>
+          </div>
+        </div>
+      </div>
+      <div className="bg-primary pt-3 pb-0 border-b border-primary">
+        <div className="container flex items-start justify-between">
+          <Link to="/">
+            <Button className="bg-white text-primary hover:bg-white/90 font-semibold px-6 py-2 rounded-lg mb-3">
+              Home
+            </Button>
+          </Link>
+          <Button onClick={handleLogout} variant="ghost" size="sm" className="text-gold hover:text-gold/80 hover:bg-primary mt-1">
+            <LogOut className="h-4 w-4 mr-1.5" />
+            <span className="text-gold">Sign out</span>
+          </Button>
+        </div>
+      </div>
     </header>
   );
 };
 
-const SubBar = () => (
-  <div className="border-t border-white/10 bg-black/10 backdrop-blur">
-    <div className="container h-10 flex items-center text-xs text-primary-foreground/80">
-      <Link to="/" className="hover:text-gold">Home</Link>
-    </div>
-  </div>
-);
 
 export const PortalFooter = () => (
   <footer className="mt-16 border-t border-border bg-secondary/60">
@@ -56,13 +59,6 @@ export const PortalFooter = () => (
       <div>
         <div className="font-display text-xl text-foreground">Women's Christian College</div>
         <div className="text-xs">College Road, Chennai – 600 006</div>
-      </div>
-      <div>
-        <div className="font-medium text-foreground mb-1">Quick Help</div>
-        <ul className="space-y-0.5">
-          <li>Hostel Office: +91 44 2827 1819</li>
-          <li>Dean of Residents: dean.residents@wcc.edu.in</li>
-        </ul>
       </div>
       <div className="md:text-right">
         © {new Date().getFullYear()} Women's Christian College, Chennai. All rights reserved.

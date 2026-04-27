@@ -10,16 +10,43 @@ type SessionUser = {
   parentId?: string;
 };
 
+type GmailAccount = {
+  id: string;
+  regNo: string;
+  email: string;
+  password: string;
+  createdAt: string;
+};
+
+type ParentProfile = {
+  email: string;
+  name: string;
+  phone: string;
+  relation: string;
+  studentRegNo: string;
+  studentName: string;
+  studentHostel: string;
+  createdAt: string;
+};
+
 interface AppState {
   user: SessionUser | null;
   requests: PermissionRequest[];
+  gmailAccounts: GmailAccount[];
+  parentProfiles: Record<string, ParentProfile>;
   login: (role: Role) => void;
   logout: () => void;
+  loginWithGmail: (email: string, parentData: ParentProfile) => void;
   addRequest: (r: Omit<PermissionRequest, "id" | "createdAt" | "status" | "approvals" | "permissionCount">) => void;
   updateRequest: (id: string, patch: Partial<PermissionRequest>) => void;
   approve: (id: string, role: Role, by: string) => void;
   reject: (id: string, role: Role, reason: string) => void;
   removeRequest: (id: string) => void;
+  addGmailAccount: (account: GmailAccount) => void;
+  removeGmailAccount: (id: string) => void;
+  getGmailAccounts: () => GmailAccount[];
+  addParentProfile: (email: string, profile: ParentProfile) => void;
+  getParentProfile: (email: string) => ParentProfile | undefined;
 }
 
 const nextStatusOnApprove = (current: PermissionRequest["status"], type: PermissionRequest["type"]): PermissionRequest["status"] => {
@@ -36,9 +63,11 @@ const nextStatusOnApprove = (current: PermissionRequest["status"], type: Permiss
 
 export const useApp = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       requests: REQUESTS,
+      gmailAccounts: [],
+      parentProfiles: {},
       login: (role) => {
         const userMap: Record<Role, SessionUser> = {
           parent: { role, name: PARENTS[0].name, email: PARENTS[0].email, parentId: PARENTS[0].id },
@@ -52,6 +81,16 @@ export const useApp = create<AppState>()(
         set({ user: userMap[role] });
       },
       logout: () => set({ user: null }),
+      loginWithGmail: (email, parentData) => {
+        set({
+          user: {
+            role: "parent",
+            name: parentData.name,
+            email: email,
+            parentId: `parent_${Date.now()}`,
+          },
+        });
+      },
       addRequest: (r) =>
         set((s) => {
           const initial: PermissionRequest["status"] = r.type === "special" ? "pending_hod" : "pending_dean";
@@ -88,8 +127,16 @@ export const useApp = create<AppState>()(
           ),
         })),
       removeRequest: (id) => set((s) => ({ requests: s.requests.filter((r) => r.id !== id) })),
+      addGmailAccount: (account) =>
+        set((s) => ({ gmailAccounts: [account, ...s.gmailAccounts] })),
+      removeGmailAccount: (id) =>
+        set((s) => ({ gmailAccounts: s.gmailAccounts.filter((a) => a.id !== id) })),
+      getGmailAccounts: () => get().gmailAccounts,
+      addParentProfile: (email, profile) =>
+        set((s) => ({ parentProfiles: { ...s.parentProfiles, [email]: profile } })),
+      getParentProfile: (email) => get().parentProfiles[email],
     }),
-    { name: "wcc-portal", partialize: (s) => ({ user: s.user, requests: s.requests }) }
+    { name: "wcc-portal", partialize: (s) => ({ user: s.user, requests: s.requests, gmailAccounts: s.gmailAccounts, parentProfiles: s.parentProfiles }) }
   )
 );
 

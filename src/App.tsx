@@ -5,25 +5,36 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
+import { LoginWithSupabase } from "./pages/LoginWithSupabase";
 import { useApp } from "@/store/useApp";
 
 import ParentTrack from "./pages/parent/ParentTrack";
 import ParentApproved from "./pages/parent/ParentApproved";
 import ParentRejected from "./pages/parent/ParentRejected";
 import PermissionForm from "./pages/parent/PermissionForm";
+import ParentGmailSignup from "./pages/parent/ParentGmailSignup";
+import ParentOtpVerification from "./pages/parent/ParentOtpVerification";
+import ParentOnboarding from "./pages/parent/ParentOnboarding";
 
 import { DeanPending, DeanApproved, DeanRejected } from "./pages/staff/DeanPages";
 import { HodPending, HodApproved, HodRejected } from "./pages/staff/HodPages";
 import { WardenPending, WardenApproved, WardenRejected, WardenNotArrived } from "./pages/staff/WardenPages";
 import { GatePassPending, GatePassApproved } from "./pages/staff/GatePassPages";
-import { SecurityApproved, SecurityExited, SecurityNotArrived } from "./pages/staff/SecurityPages";
+import { SecurityApproved, SecurityExited, SecurityArrived, SecurityNotArrived } from "./pages/staff/SecurityPages";
+import AdminHome from "./pages/staff/AdminHome";
+import AdminParents from "./pages/staff/AdminParents";
+import AdminStudents from "./pages/staff/AdminStudents";
+import AdminRequests from "./pages/staff/AdminRequests";
+import AdminStaff from "./pages/staff/AdminStaff";
+import AdminHostelStudents from "./pages/staff/AdminHostelStudents";
+import { AdminAllowlist } from "./pages/staff/AdminAllowlist";
+import AdminManageGmail from "./pages/staff/AdminManageGmail";
 
 const queryClient = new QueryClient();
 
 const Protected = ({ children }: { children: JSX.Element }) => {
   const user = useApp((s) => s.user);
-  return user ? children : <Navigate to="/login" replace />;
+  return user ? children : <Navigate to="/login-supabase" replace />;
 };
 
 const App = () => (
@@ -33,8 +44,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<LoginWithSupabase />} />
+          <Route path="/login-supabase" element={<LoginWithSupabase />} />
           <Route path="/" element={<Protected><Index /></Protected>} />
+
+          {/* Parent Gmail Flow */}
+          <Route path="/parent/gmail-signup" element={<ParentGmailSignup />} />
+          <Route path="/parent/gmail-otp" element={<ParentOtpVerification />} />
+          <Route path="/parent/onboarding" element={<ParentOnboarding />} />
 
           {/* Parent */}
           <Route path="/parent/permission/:studentId" element={<Protected><PermissionForm /></Protected>} />
@@ -70,10 +87,18 @@ const App = () => (
           <Route path="/security" element={<Protected><Index /></Protected>} />
           <Route path="/security/approved" element={<Protected><SecurityApproved /></Protected>} />
           <Route path="/security/exited" element={<Protected><SecurityExited /></Protected>} />
+          <Route path="/security/arrived" element={<Protected><SecurityArrived /></Protected>} />
           <Route path="/security/not-arrived" element={<Protected><SecurityNotArrived /></Protected>} />
 
           {/* Admin */}
-          <Route path="/admin" element={<Protected><Index /></Protected>} />
+          <Route path="/admin" element={<Protected><AdminHome /></Protected>} />
+          <Route path="/admin/parents" element={<Protected><AdminParents /></Protected>} />
+          <Route path="/admin/students" element={<Protected><AdminStudents /></Protected>} />
+          <Route path="/admin/requests" element={<Protected><AdminRequests /></Protected>} />
+          <Route path="/admin/staff" element={<Protected><AdminStaff /></Protected>} />
+          <Route path="/admin/hostel/:hostel" element={<Protected><AdminHostelStudents /></Protected>} />
+          <Route path="/admin/manage-gmail" element={<Protected><AdminManageGmail /></Protected>} />
+          <Route path="/admin/allowlist" element={<Protected><AdminAllowlist /></Protected>} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
