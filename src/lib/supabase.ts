@@ -3,7 +3,18 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase credentials. Check your .env file.')
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Automatically handle OAuth callbacks
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true, // This is important! It tells Supabase to look for session in URL hash
+  },
+})
 
 // Auth helpers
 export const signUpWithEmail = async (email: string, password: string, userMetadata?: Record<string, any>) => {

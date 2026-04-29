@@ -29,12 +29,35 @@ type ParentProfile = {
   createdAt: string;
 };
 
+type Student = {
+  id: string;
+  name: string;
+  regNo: string;
+  hostel: string;
+  floor: string;
+  room: string;
+  shift: 1 | 2;
+  department: string;
+  parentId: string;
+  parentPhone?: string;
+};
+
+type StaffMember = {
+  role: Role;
+  name: string;
+  email: string;
+  phone: string;
+  department?: string;
+};
+
 interface AppState {
   user: SessionUser | null;
   requests: PermissionRequest[];
   gmailAccounts: GmailAccount[];
   parentProfiles: Record<string, ParentProfile>;
-  login: (role: Role) => void;
+  students: Student[];
+  staff: Record<string, StaffMember>;
+  login: (user: SessionUser) => void;
   logout: () => void;
   loginWithGmail: (email: string, parentData: ParentProfile) => void;
   addRequest: (r: Omit<PermissionRequest, "id" | "createdAt" | "status" | "approvals" | "permissionCount">) => void;
@@ -47,6 +70,13 @@ interface AppState {
   getGmailAccounts: () => GmailAccount[];
   addParentProfile: (email: string, profile: ParentProfile) => void;
   getParentProfile: (email: string) => ParentProfile | undefined;
+  addStudent: (student: Student) => void;
+  updateStudent: (id: string, patch: Partial<Student>) => void;
+  removeStudent: (id: string) => void;
+  addParent: (parent: Omit<ParentProfile, "createdAt">) => void;
+  addStaff: (id: string, staff: StaffMember) => void;
+  updateStaff: (id: string, patch: Partial<StaffMember>) => void;
+  removeStaff: (id: string) => void;
 }
 
 const nextStatusOnApprove = (current: PermissionRequest["status"], type: PermissionRequest["type"]): PermissionRequest["status"] => {
@@ -68,17 +98,10 @@ export const useApp = create<AppState>()(
       requests: REQUESTS,
       gmailAccounts: [],
       parentProfiles: {},
-      login: (role) => {
-        const userMap: Record<Role, SessionUser> = {
-          parent: { role, name: PARENTS[0].name, email: PARENTS[0].email, parentId: PARENTS[0].id },
-          dean: { role, ...STAFF.dean },
-          hod: { role, ...STAFF.hod_cs },
-          warden: { role, ...STAFF.warden },
-          gatepass: { role, ...STAFF.gatepass },
-          security: { role, ...STAFF.security },
-          admin: { role, ...STAFF.admin },
-        };
-        set({ user: userMap[role] });
+      students: STUDENTS,
+      staff: STAFF,
+      login: (user) => {
+        set({ user });
       },
       logout: () => set({ user: null }),
       loginWithGmail: (email, parentData) => {
@@ -135,8 +158,36 @@ export const useApp = create<AppState>()(
       addParentProfile: (email, profile) =>
         set((s) => ({ parentProfiles: { ...s.parentProfiles, [email]: profile } })),
       getParentProfile: (email) => get().parentProfiles[email],
+      addStudent: (student) =>
+        set((s) => ({ students: [student, ...s.students] })),
+      updateStudent: (id, patch) =>
+        set((s) => ({ students: s.students.map((st) => (st.id === id ? { ...st, ...patch } : st)) })),
+      removeStudent: (id) =>
+        set((s) => ({ students: s.students.filter((st) => st.id !== id) })),
+      addParent: (parent) =>
+        set((s) => ({
+          parentProfiles: {
+            ...s.parentProfiles,
+            [parent.email]: { ...parent, createdAt: new Date().toISOString() },
+          },
+        })),
+      addStaff: (id, staffMember) =>
+        set((s) => ({ staff: { ...s.staff, [id]: staffMember } })),
+      updateStaff: (id, patch) =>
+        set((s) => ({
+          staff: {
+            ...s.staff,
+            [id]: { ...s.staff[id], ...patch },
+          },
+        })),
+      removeStaff: (id) =>
+        set((s) => {
+          const newStaff = { ...s.staff };
+          delete newStaff[id];
+          return { staff: newStaff };
+        }),
     }),
-    { name: "wcc-portal", partialize: (s) => ({ user: s.user, requests: s.requests, gmailAccounts: s.gmailAccounts, parentProfiles: s.parentProfiles }) }
+    { name: "wcc-portal", partialize: (s) => ({ user: s.user, requests: s.requests, gmailAccounts: s.gmailAccounts, parentProfiles: s.parentProfiles, students: s.students, staff: s.staff }) }
   )
 );
 
