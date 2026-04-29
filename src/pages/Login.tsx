@@ -1,11 +1,33 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { signInWithGoogle } from "@/lib/auth";
+import { signInWithGoogle } from "@/lib/firebase";
+import { useNavigate } from "react-router-dom";
 import logo from "@/assets/wcc-logo.png";
 import campus from "@/assets/campus-hero.jpg";
 
 const Login = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleGoogleSignIn = async () => {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const { error: signInError } = await signInWithGoogle();
+      if (signInError) {
+        setError(`Google Sign-In failed: ${signInError}`);
+      } else {
+        // Success - user will be redirected automatically by Firebase
+        navigate("/");
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError(`Google Sign-In error: ${errorMessage}`);
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen grid lg:grid-cols-[1.1fr_1fr]">
@@ -52,22 +74,16 @@ const Login = () => {
           <h2 className="font-display text-3xl text-foreground">Welcome Back</h2>
           <p className="text-sm text-muted-foreground mt-1 mb-8">Sign in with your authorized WCC email.</p>
 
-          {/* Google Sign-In - Only Option */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          {/* Google Sign-In */}
           <Button
             type="button"
-            onClick={async () => {
-              setGoogleLoading(true);
-              try {
-                const { error } = await signInWithGoogle();
-                if (error) {
-                  alert(`Google Sign-In failed: ${error}`);
-                }
-              } catch (err) {
-                alert(`Google Sign-In error: ${err instanceof Error ? err.message : "Unknown error"}`);
-              } finally {
-                setGoogleLoading(false);
-              }
-            }}
+            onClick={handleGoogleSignIn}
             disabled={googleLoading}
             className="w-full bg-gradient-hero hover:opacity-90 text-primary-foreground font-medium py-2.5"
           >
